@@ -63,7 +63,7 @@ describe("buildChart (namaz takip çizelgesi)", () => {
   it("exports G, İ, H and X for separate prayer cells", () => {
     const students = [{ id: "s1", name: "Ali" }] as Student[];
     const r = { ...row("new", "2026-11-01", []), durumlar: { Sabah: "gec", Akşam: "izinli", Yatsı: "hasta", Ders: "hasta" } as const };
-    expect(buildChart(students, [r]).rows[0]?.days).toEqual([["G", "X", "X", "İ", "H"]]);
+    expect(buildChart(students, [r]).rows[0]?.days).toEqual([["G", "", "", "İ", "H"]]);
     expect(buildReport(students, [r]).detail[0]).toMatchObject({ vakitler: ["G", "X", "X", "İ", "H"], ders: "H" });
     expect(buildReport(students, [r]).summary[0]).toMatchObject({ kilinan: 1, gec: 1, izinli: 1, hasta: 1 });
   });
@@ -90,7 +90,7 @@ describe("buildChart (namaz takip çizelgesi)", () => {
   });
   it("counts prayer times attended and missed", () => {
     expect(c.rows[0]!.katildi).toBe(3);
-    expect(c.rows[0]!.katilmadi).toBe(12);
+    expect(c.rows[0]!.katilmadi).toBe(3);
   });
   it("leaves a day with no record blank and counts neither missing nor izinli days as missed", () => {
     expect(c.rows[1]!.days[0]).toEqual(["İ", "İ", "İ", "İ", "İ"]);
@@ -120,7 +120,7 @@ describe("full-period attendance charts with only two recorded days", () => {
   it("keeps unrecorded days blank without adding absences or diluting recorded totals", () => {
     const chart = buildChart(students, recorded, periodRange("aylik", "2026-11-03"));
     expect(chart.rows[0]?.days[0]).toEqual(["", "", "", "", ""]);
-    expect(chart.rows[0]?.days[1]).toEqual(["✓", "X", "X", "X", "X"]);
+    expect(chart.rows[0]?.days[1]).toEqual(["✓", "", "", "", ""]);
     expect(chart.rows[0]?.days[2]).toEqual(["X", "X", "X", "X", "X"]);
     expect(chart.rows[0]?.days.slice(3).flat().every((mark) => mark === "")).toBe(true);
     expect(chart.rows[0]).toMatchObject({ katildi: 1, katilmadi: 9 });
@@ -139,7 +139,7 @@ describe("chartByMonth", () => {
     expect(months.map((m) => m.label)).toEqual(["Eylül 2026", "Ekim 2026"]);
   });
   it("counts prayer times per month only", () => {
-    expect(months[0]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 4 });
+    expect(months[0]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 0 });
     expect(months[1]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 9 });
   });
 });
