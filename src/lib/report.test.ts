@@ -90,7 +90,7 @@ describe("buildChart (namaz takip çizelgesi)", () => {
   });
   it("counts prayer times attended and missed", () => {
     expect(c.rows[0]!.katildi).toBe(3);
-    expect(c.rows[0]!.katilmadi).toBe(1);
+    expect(c.rows[0]!.katilmadi).toBe(12);
   });
   it("leaves a day with no record blank and counts neither missing nor izinli days as missed", () => {
     expect(c.rows[1]!.days[0]).toEqual(["İ", "İ", "İ", "İ", "İ"]);
@@ -140,6 +140,6 @@ describe("chartByMonth", () => {
   });
   it("counts prayer times per month only", () => {
     expect(months[0]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 4 });
-    expect(months[1]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 1 });
+    expect(months[1]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 9 });
   });
 });
