@@ -165,6 +165,9 @@ export function buildChart(students: Student[], rows: AttendanceRow[], range?: R
   const ids = new Set(students.map((s) => s.id));
   const days = range ? rangeDays(range) : [...new Set(rows.filter((r) => ids.has(r.studentId)).map((r) => r.date))].sort();
   const byKey = new Map(rows.map((r) => [`${r.studentId}|${r.date}`, r]));
+  // A vakit counts as "taken" on a day only once someone in the class was marked for it; otherwise it stays blank.
+  const taken = new Map<string, Set<string>>();
+  for (const r of rows) for (const v of VAKITLER) if (cellStatus(r, v) !== "yok") (taken.get(r.date) ?? taken.set(r.date, new Set()).get(r.date)!).add(v);
   const list: ChartRow[] = [...students]
     .sort((a, b) => a.name.localeCompare(b.name, "tr"))
     .map((s) => {
@@ -172,7 +175,7 @@ export function buildChart(students: Student[], rows: AttendanceRow[], range?: R
       const marks = days.map((d) => {
         const r = byKey.get(`${s.id}|${d}`);
         if (!r) return VAKITLER.map((): ChartMark => "");
-        const m = VAKITLER.map((v) => CELL_LETTER[cellStatus(r, v)]);
+        const m = VAKITLER.map((v): ChartMark => (taken.get(d)?.has(v) ? CELL_LETTER[cellStatus(r, v)] : ""));
         katildi += m.filter((x) => x === "✓" || x === "G").length;
         katilmadi += m.filter((x) => x === "X").length;
         return m;

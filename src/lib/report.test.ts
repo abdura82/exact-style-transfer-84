@@ -143,3 +143,14 @@ describe("chartByMonth", () => {
     expect(months[1]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 9 });
   });
 });
+
+describe("unmarked vakit stay blank", () => {
+  it("leaves vakit nobody was marked for blank instead of X", () => {
+    const st = [{ id: "a", name: "Ali" }, { id: "b", name: "Bekir" }] as never[];
+    const r = (studentId: string, vakitler: string[]) => ({ id: studentId, studentId, date: "2026-11-02", vakitler, ders: false, durum: "normal" }) as never;
+    const c = buildChart(st, [r("a", ["Sabah"]), r("b", [])]);
+    expect(c.rows[0]!.days[0]).toEqual(["✓", "", "", "", ""]);
+    expect(c.rows[1]!.days[0]).toEqual(["X", "", "", "", ""]);
+    expect(c.rows[1]).toMatchObject({ katildi: 0, katilmadi: 1 });
+  });
+});
