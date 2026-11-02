@@ -74,8 +74,8 @@ describe("buildChart (namaz takip çizelgesi)", () => {
       { ...row("partial", "2026-11-02", []), durumlar: { Akşam: "izinli" } },
       { ...row("excused", "2026-11-03", []), durumlar: { Sabah: "hasta", Öğle: "izinli", İkindi: "hasta", Akşam: "izinli", Yatsı: "hasta" } },
     ]);
-    expect(chart.rows[0]).toMatchObject({ katildi: 1, katilmadi: 1 });
-    expect(chartByMonth(chart)[0]?.rows[0]).toMatchObject({ katildi: 1, katilmadi: 1 });
+    expect(chart.rows[0]).toMatchObject({ katildi: 1, katilmadi: 8 });
+    expect(chartByMonth(chart)[0]?.rows[0]).toMatchObject({ katildi: 1, katilmadi: 8 });
   });
   const st = [{ id: "a", name: "Ali" }, { id: "b", name: "Bekir" }] as never[];
   const chartRow = (studentId: string, date: string, vakitler: string[], durum = "normal") => ({ id: studentId + date, studentId, date, vakitler, ders: false, durum }) as never;
@@ -88,8 +88,8 @@ describe("buildChart (namaz takip çizelgesi)", () => {
   it("ticks prayed vakit and marks the rest with X", () => {
     expect(c.rows[0]!.days[0]).toEqual(["✓", "✓", "X", "X", "X"]);
   });
-  it("counts days attended and missed", () => {
-    expect(c.rows[0]!.katildi).toBe(2);
+  it("counts prayer times attended and missed", () => {
+    expect(c.rows[0]!.katildi).toBe(3);
     expect(c.rows[0]!.katilmadi).toBe(1);
   });
   it("leaves a day with no record blank and counts neither missing nor izinli days as missed", () => {
@@ -123,8 +123,8 @@ describe("full-period attendance charts with only two recorded days", () => {
     expect(chart.rows[0]?.days[1]).toEqual(["✓", "X", "X", "X", "X"]);
     expect(chart.rows[0]?.days[2]).toEqual(["X", "X", "X", "X", "X"]);
     expect(chart.rows[0]?.days.slice(3).flat().every((mark) => mark === "")).toBe(true);
-    expect(chart.rows[0]).toMatchObject({ katildi: 1, katilmadi: 1 });
-    expect(chartByMonth(chart)[0]?.rows[0]).toMatchObject({ katildi: 1, katilmadi: 1 });
+    expect(chart.rows[0]).toMatchObject({ katildi: 1, katilmadi: 9 });
+    expect(chartByMonth(chart)[0]?.rows[0]).toMatchObject({ katildi: 1, katilmadi: 9 });
     expect(chart.rows[1]?.days.flat()).toEqual(Array(150).fill(""));
     expect(chart.rows[1]).toMatchObject({ katildi: 0, katilmadi: 0 });
     expect(buildReport(students, recorded).summary[0]).toMatchObject({ gun: 2, toplamVakit: 10 });
@@ -138,8 +138,8 @@ describe("chartByMonth", () => {
   it("makes one chart per month in order", () => {
     expect(months.map((m) => m.label)).toEqual(["Eylül 2026", "Ekim 2026"]);
   });
-  it("counts days per month only", () => {
-    expect(months[0]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 0 });
+  it("counts prayer times per month only", () => {
+    expect(months[0]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 4 });
     expect(months[1]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 1 });
   });
 });
