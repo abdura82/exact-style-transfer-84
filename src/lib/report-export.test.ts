@@ -49,8 +49,8 @@ describe("report downloads", () => {
       const blob = await makePdf(input());
       const text = Buffer.from(await readBlob(blob)).toString("latin1");
       const counts = [...text.matchAll(/\/Count\s+(\d+)/g)].map((m) => Number(m[1]));
-      // Kasım: 30 gün, sayfa başına 10 gün = 3 çizelge sayfası; özet sayfası eklenseydi 4 olurdu.
-      expect(Math.max(...counts)).toBe(3);
+      // Kasım: 30 gün, sayfa başına 15 gün = 2 çizelge sayfası; özet sayfası eklenseydi 4 olurdu.
+      expect(Math.max(...counts)).toBe(2);
     } finally {
       globalThis.fetch = original;
     }

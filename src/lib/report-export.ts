@@ -31,7 +31,7 @@ type Pdf = import("jspdf").jsPDF;
 type MonthChart = ReturnType<typeof chartByMonth>[number];
 
 const pageMonth = new Map<number, string>();
-const DAYS_PER_PAGE = 10, ROWS_PER_PAGE = 28;
+const DAYS_PER_PAGE = 16, ROWS_PER_PAGE = 30;
 
 /** Landscape namaz takip çizelgesi pages for one month (✓ / X / İ grid + day counts). */
 function chartPdfPages(doc: Pdf, m: MonthChart, first: boolean) {
@@ -55,7 +55,7 @@ function chartPdfPages(doc: Pdf, m: MonthChart, first: boolean) {
       const tableW = noW + nameW + days.length * V * vw + 2 * cntW;
       const x0 = L + (W - L - R - tableW) / 2;
       const xv = x0 + noW + nameW, xc = xv + days.length * V * vw;
-      const yT = 10, yD = 18, yV = 24, yH = 42, rh = 5.6;
+      const yT = 10, yD = 18, yV = 24, yH = 42, rh = Math.min(5.6, (200 - yH) / Math.max(1, rows.length));
       doc.setDrawColor(0); doc.setLineWidth(0.2); doc.setTextColor(0);
       doc.rect(x0, yT, tableW, yD - yT);
       doc.setFont("DejaVu", "bold"); doc.setFontSize(12);
@@ -80,7 +80,7 @@ function chartPdfPages(doc: Pdf, m: MonthChart, first: boolean) {
       doc.text("NO", x0 + noW / 2, yH - 2, { align: "center" });
       doc.text("ADI SOYADI", x0 + noW + nameW / 2, yH - 2, { align: "center" });
       doc.text("NAMAZ", x0 + noW + nameW / 2, yV + 6, { align: "center" });
-      (["KATILDIĞI GÜN", "KATILMADIĞI GÜN"] as const).forEach((h, j) => {
+      (["KATILDIĞI VAKİT", "KATILMADIĞI VAKİT"] as const).forEach((h, j) => {
         const x = xc + j * cntW;
         if (j) doc.setFillColor(250, 230, 230); else doc.setFillColor(229, 241, 235);
         doc.rect(x, yD, cntW, yH - yD, "FD");
@@ -94,18 +94,18 @@ function chartPdfPages(doc: Pdf, m: MonthChart, first: boolean) {
         const r = m.rows[ri]!;
         const y = yH + k * rh;
         doc.setTextColor(0); doc.setFont("DejaVu", "normal"); doc.setFontSize(7.5);
-        doc.rect(x0, y, noW, rh); doc.text(String(ri + 1), x0 + noW / 2, y + 3.9, { align: "center" });
+        doc.rect(x0, y, noW, rh); doc.text(String(ri + 1), x0 + noW / 2, y + rh * 0.7, { align: "center" });
         doc.rect(x0 + noW, y, nameW, rh);
         doc.setFont("DejaVu", "bold"); doc.setFontSize(7);
         const nm = doc.splitTextToSize(r.name, nameW - 2) as string[];
-        doc.text(nm[0]!, x0 + noW + 1, y + 3.8);
+        doc.text(nm[0]!, x0 + noW + 1, y + rh * 0.68);
         days.forEach((di, kk) => r.days[di]!.forEach((mark, j) => {
           const cx = xv + (kk * V + j) * vw;
           doc.rect(cx, y, vw, rh);
           const col: [number, number, number] = mark === "✓" ? [30, 123, 79] : mark === "X" ? [196, 52, 52] : [116, 82, 170];
           doc.setTextColor(col[0], col[1], col[2]);
           doc.setFontSize(Math.min(8, vw * 2.3));
-          doc.text(mark, cx + vw / 2, y + 3.9, { align: "center" });
+          doc.text(mark, cx + vw / 2, y + rh * 0.7, { align: "center" });
         }));
         doc.setFontSize(9);
         doc.setTextColor(30, 123, 79); doc.rect(xc, y, cntW, rh); doc.text(String(r.katildi), xc + cntW / 2, y + 4, { align: "center" });
@@ -221,7 +221,7 @@ function chartSheet(XLSX: XL, chart: NonNullable<ExportInput["chart"]>, title: s
     }
     merges.push({ s: { r: 1, c: c0 }, e: { r: 1, c: c0 + V - 1 } });
   });
-  ["KATILDIĞI GÜN", "KATILMADIĞI GÜN"].forEach((h, j) => {
+  ["KATILDIĞI VAKİT", "KATILMADIĞI VAKİT"].forEach((h, j) => {
     for (let r = 1; r <= 3; r++) put(r, last + j, r === 1 ? h : "", { ...bold(8), ...vert, ...(j ? { fill: { fgColor: { rgb: "FAE6E6" } } } : fillG) });
     merges.push({ s: { r: 1, c: last + j }, e: { r: 3, c: last + j } });
   });
@@ -323,7 +323,7 @@ function blankChartPdfPages(doc: Pdf, chart: BlankChart, days: string[], label: 
     doc.text("NO", x0 + noW / 2, yH - 2, { align: "center" });
     doc.text("ADI SOYADI", x0 + noW + nameW / 2, yH - 2, { align: "center" });
     doc.text("NAMAZ", x0 + noW + nameW / 2, yV + 6, { align: "center" });
-    (["KATILDIĞI GÜN", "KATILMADIĞI GÜN"] as const).forEach((h, j) => {
+    (["KATILDIĞI VAKİT", "KATILMADIĞI VAKİT"] as const).forEach((h, j) => {
       const x = xc + j * cntW;
       if (j) doc.setFillColor(250, 230, 230); else doc.setFillColor(229, 241, 235);
       doc.rect(x, yD, cntW, yH - yD, "FD");
@@ -401,7 +401,7 @@ function blankChartSheet(XLSX: XL, chart: BlankChart, days: string[], title: str
     }
     merges.push({ s: { r: 1, c: c0 }, e: { r: 1, c: c0 + C - 1 } });
   });
-  ["KATILDIĞI GÜN", "KATILMADIĞI GÜN"].forEach((h, j) => {
+  ["KATILDIĞI VAKİT", "KATILMADIĞI VAKİT"].forEach((h, j) => {
     for (let r = 1; r <= 3; r++) put(r, last + j, r === 1 ? h : "", { ...bold(8), ...vert, ...(j ? { fill: { fgColor: { rgb: "FAE6E6" } } } : fillG) });
     merges.push({ s: { r: 1, c: last + j }, e: { r: 3, c: last + j } });
   });
