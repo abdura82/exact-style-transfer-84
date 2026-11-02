@@ -94,18 +94,18 @@ function chartPdfPages(doc: Pdf, m: MonthChart, first: boolean) {
         const r = m.rows[ri]!;
         const y = yH + k * rh;
         doc.setTextColor(0); doc.setFont("DejaVu", "normal"); doc.setFontSize(7.5);
-        doc.rect(x0, y, noW, rh); doc.text(String(ri + 1), x0 + noW / 2, y + 3.9, { align: "center" });
+        doc.rect(x0, y, noW, rh); doc.text(String(ri + 1), x0 + noW / 2, y + rh * 0.7, { align: "center" });
         doc.rect(x0 + noW, y, nameW, rh);
         doc.setFont("DejaVu", "bold"); doc.setFontSize(7);
         const nm = doc.splitTextToSize(r.name, nameW - 2) as string[];
-        doc.text(nm[0]!, x0 + noW + 1, y + 3.8);
+        doc.text(nm[0]!, x0 + noW + 1, y + rh * 0.68);
         days.forEach((di, kk) => r.days[di]!.forEach((mark, j) => {
           const cx = xv + (kk * V + j) * vw;
           doc.rect(cx, y, vw, rh);
           const col: [number, number, number] = mark === "✓" ? [30, 123, 79] : mark === "X" ? [196, 52, 52] : [116, 82, 170];
           doc.setTextColor(col[0], col[1], col[2]);
           doc.setFontSize(Math.min(8, vw * 2.3));
-          doc.text(mark, cx + vw / 2, y + 3.9, { align: "center" });
+          doc.text(mark, cx + vw / 2, y + rh * 0.7, { align: "center" });
         }));
         doc.setFontSize(9);
         doc.setTextColor(30, 123, 79); doc.rect(xc, y, cntW, rh); doc.text(String(r.katildi), xc + cntW / 2, y + 4, { align: "center" });
