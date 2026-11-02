@@ -1,5 +1,5 @@
 import type { AttendanceRow, Student } from "./store";
-import { VAKITLER, CELL_LETTER, CELL_LABEL, cellStatus, came, computeStats, dayResult } from "./stats";
+import { VAKITLER, CELL_LETTER, CELL_LABEL, cellStatus, came, computeStats } from "./stats";
 
 export type Period = "gunluk" | "haftalik" | "aylik" | "yillik" | "tumu";
 
@@ -159,7 +159,7 @@ export type ChartRow = { name: string; days: ChartMark[][]; katildi: number; kat
  * Namaz takip çizelgesi: one row per student, one 5-vakit block per selected day.
  * Unrecorded student-days remain blank and do not count as absences.
  * ✓ = geldi, G = geç, İ = izinli, H = hasta, X = gelmedi.
- * Katıldığı gün = at least one attended/late prayer; missed = none attended and at least one X.
+ * Katıldığı/katılmadığı = number of prayer times (vakit) attended (✓/G) or missed (X).
  */
 export function buildChart(students: Student[], rows: AttendanceRow[], range?: Range) {
   const ids = new Set(students.map((s) => s.id));
@@ -172,10 +172,10 @@ export function buildChart(students: Student[], rows: AttendanceRow[], range?: R
       const marks = days.map((d) => {
         const r = byKey.get(`${s.id}|${d}`);
         if (!r) return VAKITLER.map((): ChartMark => "");
-        const result = dayResult(r);
-        if (result === "katildi") katildi++;
-        if (result === "katilmadi") katilmadi++;
-        return VAKITLER.map((v) => CELL_LETTER[cellStatus(r, v)]);
+        const m = VAKITLER.map((v) => CELL_LETTER[cellStatus(r, v)]);
+        katildi += m.filter((x) => x === "✓" || x === "G").length;
+        katilmadi += m.filter((x) => x === "X").length;
+        return m;
       });
       return { name: s.name, days: marks, katildi, katilmadi };
     });
@@ -195,8 +195,9 @@ export function chartByMonth(chart: ReturnType<typeof buildChart>) {
       days: idx.map((i) => chart.days[i]!),
       rows: chart.rows.map((r) => {
         const days = idx.map((i) => r.days[i]!);
-        const katildi = days.filter((m) => m.includes("✓") || m.includes("G")).length;
-        const katilmadi = days.filter((m) => !m.includes("✓") && !m.includes("G") && m.includes("X")).length;
+        const flat = days.flat();
+        const katildi = flat.filter((m) => m === "✓" || m === "G").length;
+        const katilmadi = flat.filter((m) => m === "X").length;
         return { name: r.name, days, katildi, katilmadi };
       }),
     };
