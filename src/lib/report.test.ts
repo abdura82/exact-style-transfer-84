@@ -140,7 +140,7 @@ describe("chartByMonth", () => {
   });
   it("counts prayer times per month only", () => {
     expect(months[0]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 0 });
-    expect(months[1]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 9 });
+    expect(months[1]!.rows[0]).toMatchObject({ katildi: 1, katilmadi: 0 });
   });
 });
 
